@@ -1,0 +1,11 @@
+{
+  "spectral_radius_A": 0.5727810031028533,
+  "ghg_mapped_vs_published_pct": -0.00042913340977390746,
+  "ghg_published_industry_total_THS_T": 2895512.14546,
+  "ghg_mapped_total_THS_T": 2895499.7198499995,
+  "zero_output_industries": [
+    "L68A"
+  ],
+  "n_industries": 64,
+  "n_manufacturing_targets": 19
+}
