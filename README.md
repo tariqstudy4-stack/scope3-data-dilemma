@@ -18,7 +18,7 @@ the PCF tier-chaining model crossed with the participation/depth/seed factorial
 design, experiment execution, and the downstream sensitivity, validation, and
 figure-generation stages. Boxes name the exact script or artifact responsible for
 each stage; see [Experiment scripts](#experiment-scripts) below for the full
-script-to-output mapping.
+script-to-output mapping. Regenerate this figure with `figures/make_experiment_design_fig.py`.
 
 ## What this benchmarks
 
@@ -68,6 +68,7 @@ published EU-27 totals to within 0.001% for all four characterized indicators
 | `code/patterns.py` | (library) | Random / flow-weighted / sector-clustered / strategic participation orderings |
 | `code/experiments.py` | `data/results.json`, `results.csv` | Main grid: 4 indicators x 3 patterns x 8 rates x 4 tiers x 10 seeds |
 | `code/experiments2.py <indicator idx 0-3>` | `data/results_400_<idx>.json` (Zenodo archive only) | Same grid at 400 seeds/condition, nested participant ordering shared across indicators and tier depths, plus a fourth (strategic/self-selected) adoption pattern; chunked per indicator so each chunk completes in one run (~50 min/indicator — see `logs/`) |
+| `code/equal_pds_check.py` | `data/equal_pds_check.json` | Equal-declared-PDS, cross-adoption-pattern comparison: re-plots accuracy against realized declared PDS (not raw participation rate) for random/flow/cluster, at 400 seeds/condition, converged chaining, to test whether flow-weighted's apparent accuracy advantage is genuine or a restatement of PDS itself |
 | `code/gsd_sweep.py`, `gsd_sweep2.py` | `data/gsd_sweep.json`, `gsd_sweep_ext.json` | Sensitivity of interval coverage to the assumed pedigree-style GSD (1.2-3.0, extended to 10.0) |
 | `code/strength_sweep.py` | `data/strength_sweep.json` | Self-selection strength sensitivity (gaming parameter λ) for the strategic adoption pattern discussed in Limitations |
 | `code/robustness_check2.py` | `data/robustness_check2.json` | Noisy self-assessment, GHG-only selection basis, per-indicator R², bootstrap CIs |
@@ -108,6 +109,7 @@ python code/experiments2.py 0             # -> data/results_400_0.json (GHG, 400
 python code/experiments2.py 1             # ACG
 python code/experiments2.py 2             # O3PR
 python code/experiments2.py 3             # PM2_5
+python code/equal_pds_check.py
 python code/gsd_sweep.py && python code/gsd_sweep2.py
 python code/strength_sweep.py
 python code/robustness_check2.py
