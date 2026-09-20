@@ -146,6 +146,9 @@ regenerate them locally with the commands above.
   2.0 as the baseline assumption; `gsd_sweep.py`/`gsd_sweep2.py` test sensitivity
   to this choice across 1.2-10.0.
 
+##Declaratio of AI Use:
+Declaration of Generative AI and AI-assisted technologies in the research process. During the preparation of this work, the author(s) used Claude (Anthropic) to run a simulated multi-reviewer critique of the manuscript draft prior to submission, to assist to a limited extent with code-management tasks, and to help condense the manuscript to the conference's six-page limit. All resulting suggestions and edits were evaluated by the author(s), who take full responsibility for the content of the publication.
+
 ## License
 
 Code in this repository is released under the MIT License (see `LICENSE`). The
