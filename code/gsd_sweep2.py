@@ -6,6 +6,7 @@ import numpy as np
 from cascade import true_pcf, secondary_factors
 from patterns import sample
 from experiments import cascade_batch
+from intervals import mean_preserving
 
 d = np.load("data/matrices.npz", allow_pickle=True)
 A, E, Z = d["A"], d["E"], d["Z"]
@@ -21,7 +22,7 @@ for k, pol in enumerate(d["airpol"]):
     e, s_row, m = E[k], S[k], M[k]
     for rate in (0.2, 0.8):
         for gsd in GSDS:
-            covs = []
+            covs = []; covs_m = []
             for seed in range(SEEDS):
                 key = f"gsd2|{k}|flow|{rate}|{seed}"
                 rng = np.random.default_rng(int(hashlib.md5(key.encode()).hexdigest()[:8], 16))
@@ -31,7 +32,14 @@ for k, pol in enumerate(d["airpol"]):
                 lo = np.percentile(draws, 2.5, axis=0)
                 hi = np.percentile(draws, 97.5, axis=0)
                 covs.append(np.mean((m[tidx] >= lo[tidx]) & (m[tidx] <= hi[tidx])) * 100)
-            out[f"{pol}|{rate}|{gsd}"] = float(np.mean(covs))
+                d0 = cascade_batch(A, e, np.zeros((1, n)), P, None)
+                dm = mean_preserving(draws, d0, np.log(gsd))
+                lo = np.percentile(dm, 2.5, axis=0); hi = np.percentile(dm, 97.5, axis=0)
+                covs_m.append(np.mean((m[tidx] >= lo[tidx]) & (m[tidx] <= hi[tidx])) * 100)
+            out[f"{pol}|{rate}|{gsd}"] = float(np.mean(covs))          # median-preserving convention
+            out[f"{pol}|{rate}|{gsd}|mean"] = float(np.mean(covs_m))   # mean-preserving convention
 json.dump(out, open("data/gsd_sweep_ext.json", "w"), indent=1)
 for pol in ("GHG", "ACG", "O3PR", "PM2_5"):
-    print(pol, "@80%:", [round(out[f"{pol}|0.8|{g}"], 1) for g in GSDS])
+    for rate in (0.2, 0.8):
+        print(pol, f"@{rate}: median", [round(out[f"{pol}|{rate}|{g}"], 1) for g in GSDS],
+              "mean", [round(out[f"{pol}|{rate}|{g}|mean"], 1) for g in GSDS])

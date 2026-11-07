@@ -1,4 +1,6 @@
-"""Full experiment grid for the PCF cascade benchmark."""
+"""Full experiment grid for the PCF cascade benchmark (ten seeds). Coverage and width are stored for both lognormal
+conventions: coverage/rel_width (median-preserving) and coverage_m1/rel_width_m1 (mean-preserving); see intervals.py."""
+import csv
 import hashlib
 import json
 import time
@@ -7,6 +9,7 @@ import numpy as np
 
 from cascade import (secondary_factors, true_pcf, mape, ranking_flips)
 from patterns import PATTERNS, sample
+from intervals import mean_preserving, coverage_width
 
 RATES = [0.0, 0.05, 0.10, 0.20, 0.40, 0.60, 0.80, 1.00]
 TIERS = [1, 2, 3, None]          # None = converged (infinite chaining)
@@ -75,7 +78,7 @@ def main():
     t0 = time.time()
     for k, pol in enumerate(d["airpol"]):
         e, s_row, m = E[k], S[k], M[k]
-        for pattern in PATTERNS:
+        for pattern in PATTERNS[:3]:  # random, flow, cluster (strategic is run in experiments2.py)
             for rate in RATES:
                 for tiers in TIERS:
                     for seed in SEEDS:
@@ -90,13 +93,10 @@ def main():
                         noise = rng.lognormal(0.0, sigma, size=(N_DRAWS, n))
                         draws = cascade_batch(A, e, s_row[None, :] * noise,
                                               P, tiers)
-                        lo = np.percentile(draws, (100 - NOMINAL) / 2, axis=0)
-                        hi = np.percentile(draws, 100 - (100 - NOMINAL) / 2,
-                                           axis=0)
-                        cov = float(np.mean((m[tidx] >= lo[tidx])
-                                            & (m[tidx] <= hi[tidx])) * 100)
-                        width = float(np.median(
-                            (hi[tidx] - lo[tidx]) / np.maximum(m[tidx], 1e-30)))
+                        cov, width = coverage_width(draws, m, tidx, NOMINAL)
+                        d0 = cascade_batch(A, e, np.zeros((1, n)), P, tiers)
+                        cov_m1, width_m1 = coverage_width(
+                            mean_preserving(draws, d0, sigma), m, tidx, NOMINAL)
                         flips, npairs = ranking_flips(pt, m, tidx)
                         pds = primary_data_share(A, e, s_row, P, tiers)
                         rows.append(dict(
@@ -104,6 +104,7 @@ def main():
                             tiers=(0 if tiers is None else tiers), seed=seed,
                             mape=mape(pt, m, tidx), flips=flips,
                             n_pairs=npairs, coverage=cov, rel_width=width,
+                            coverage_m1=cov_m1, rel_width_m1=width_m1,
                             n_participants=int(P.sum()),
                             pds=float(np.mean(pds[tidx])),
                             flow_share=float(supply[P].sum() / supply.sum()),
@@ -112,6 +113,9 @@ def main():
 
     with open("data/results.json", "w") as f:
         json.dump(rows, f)
+    with open("data/results.csv", "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(rows[0]))
+        w.writeheader(); w.writerows(rows)
     print(f"TOTAL {len(rows)} conditions in {time.time()-t0:.0f}s")
 
 

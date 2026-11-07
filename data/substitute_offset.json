@@ -1,0 +1,34 @@
+{
+ "multiplier_mean_at_assumed_gsd": 1.2715371297141405,
+ "indicators": {
+  "GHG": {
+   "mean_signed_error_pct": -3.9670454868490745,
+   "mean_abs_error_pct": 16.5921180522476,
+   "median_abs_error_pct": 13.848282222629196,
+   "share_overstated": 0.42105263157894735
+  },
+  "ACG": {
+   "mean_signed_error_pct": 22.278937788659267,
+   "mean_abs_error_pct": 31.919122328079037,
+   "median_abs_error_pct": 23.09672719089195,
+   "share_overstated": 0.7894736842105263
+  },
+  "O3PR": {
+   "mean_signed_error_pct": 13.284659189553297,
+   "mean_abs_error_pct": 18.731096865767377,
+   "median_abs_error_pct": 18.56251547253522,
+   "share_overstated": 0.6842105263157895
+  },
+  "PM2_5": {
+   "mean_signed_error_pct": 9.756840295591083,
+   "mean_abs_error_pct": 22.98141631660843,
+   "median_abs_error_pct": 18.845902447197506,
+   "share_overstated": 0.5789473684210527
+  }
+ },
+ "within_section_gsd": {
+  "median": 1.279550233377516,
+  "share_below_assumed": 0.75,
+  "n_cells": 48
+ }
+}

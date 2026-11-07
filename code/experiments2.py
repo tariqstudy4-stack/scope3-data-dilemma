@@ -1,4 +1,7 @@
-"""Revised experiment grid: 400 seeds, nested/paired participant order
+"""Revised experiment grid (coverage and width are stored for two lognormal conventions:
+coverage/rel_width = median-preserving, coverage_m1/rel_width_m1 = mean-preserving; see intervals.py).
+
+Revised experiment grid: 400 seeds, nested/paired participant order
 (shared across indicators and tier depths for a given pattern+seed), and a
 fourth (strategic / MNAR) adoption pattern. Chunked by indicator via CLI
 arg so each chunk finishes inside a single shell call.
@@ -14,6 +17,7 @@ import numpy as np
 
 from cascade import secondary_factors, true_pcf, mape, ranking_flips, ape_per_target
 from patterns import PATTERNS, full_order, sample_from_order
+from intervals import mean_preserving, coverage_width
 
 RATES = [0.0, 0.05, 0.10, 0.20, 0.40, 0.60, 0.80, 1.00]
 TIERS = [1, 2, 3, None]
@@ -108,13 +112,10 @@ def main():
                         noise = rng_mc.lognormal(0.0, sigma, size=(N_DRAWS, n))
                         draws = cascade_batch(A, e, s_row[None, :] * noise,
                                               P, tiers)
-                        lo = np.percentile(draws, (100 - NOMINAL) / 2, axis=0)
-                        hi = np.percentile(draws, 100 - (100 - NOMINAL) / 2,
-                                           axis=0)
-                        cov = float(np.mean((m[tidx] >= lo[tidx])
-                                            & (m[tidx] <= hi[tidx])) * 100)
-                        width = float(np.median(
-                            (hi[tidx] - lo[tidx]) / np.maximum(m[tidx], 1e-30)))
+                        cov, width = coverage_width(draws, m, tidx, NOMINAL)
+                        d0 = cascade_batch(A, e, np.zeros((1, n)), P, tiers)
+                        cov_m1, width_m1 = coverage_width(
+                            mean_preserving(draws, d0, sigma), m, tidx, NOMINAL)
                         flips, npairs = ranking_flips(pt, m, tidx)
                         pds = primary_data_share(A, e, s_row, P, tiers)
                         ape = ape_per_target(pt, m, tidx)
@@ -125,7 +126,8 @@ def main():
                             p90=float(np.percentile(ape, 90)),
                             maxape=float(np.max(ape)),
                             flips=flips, n_pairs=npairs, coverage=cov,
-                            rel_width=width, n_participants=int(P.sum()),
+                            rel_width=width, coverage_m1=cov_m1,
+                            rel_width_m1=width_m1, n_participants=int(P.sum()),
                             pds=float(np.mean(pds[tidx])),
                             flow_share=float(supply[P].sum() / supply.sum()),
                         ))

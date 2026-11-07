@@ -16,7 +16,7 @@ authors:
     given-names: Navneet
 date-released: 2026
 license: MIT
-repository-code: "REPLACE_WITH_GITHUB_URL"
+repository-code: "https://github.com/tariqstudy4-stack/scope3-data-dilemma"
 preferred-citation:
   type: conference-paper
   title: "The Scope 3 Data Dilemma: How Much Real Data Makes a Product Footprint Credible?"
